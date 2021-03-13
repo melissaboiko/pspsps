@@ -29,20 +29,24 @@ not use it with `pspsps -w|less -R` (＾ 〜)–☆
 catgirls are kindly provided by Safebooru.    
 u can call other peoples too with `--tags`. like
 
-![pspsps(1) now is calling catboys, nyaaan💕](screenshot2.png?v=2)
+![pspsps(1) now is calling catboys, nyaaan💕](screenshot2.png?v=3)
 
 there are optinyons to make them smaller or bigger or save the images
 or load from an image and meowre!    
 
-![pspsps(1) is saving a drawing of catgirls in love](screenshot3.png)
+![pspsps(1) is saving a drawing of catgirls in love](screenshot3.png?v=3)
 
 u can also make drawings with nyascii characters nyanstead of
 colourful nyansi art.  tho the mangas in nyascii dont look so good in
 most terminyal sizes, mew.  but on the linux kyonsole (with few
 colours & no Nyunicode but good resolution) a girl thinks ascii looks
-better nyoften.
+better nyoften. so the defaults are for nyansi on graphical terminals
+and nyascii on console.
 
-![pspsps(1) is drawing catgirl nyascii on the Linux console](screenshot-kyonsole.png)
+![pspsps(1) is drawing catgirls in nyascii and nyansi, on the gnomes' terminals](screenshot4.png?v=3)
+
+![pspsps(1) is drawing catgirls in nyascii and nyansi, on the Linux console](screenshot-kyonsole.png?v=3)
+
 
 ## the 'installation' how to
 
