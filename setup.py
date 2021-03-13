@@ -14,18 +14,19 @@ URL = 'https://github.com/melissaboiko/pspsps'
 EMAIL = 'melissa@namakajiri.net'
 AUTHOR = 'Melissa Boiko'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.4'
+VERSION = '0.1.5'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
     'typing',
     'typing-extensions',
-    'climage'
+    'climage',
+    'ascii_magic',
 ]
 
 # What packages are optional?
 EXTRAS = {
-    'ascii output': 'ascii_magic',
+    # none for now nya
 }
 
 here = os.path.abspath(os.path.dirname(__file__))
