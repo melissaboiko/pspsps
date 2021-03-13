@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+# pspsps – show catgirls on Linux terminal
+import os
+import sys
+import argparse
+import logging
+import tempfile
+import atexit
+
+from shutil import get_terminal_size
+from urllib.error import URLError
+
+from typing import List, Optional
+
+from pspsps.safebooru import catgirl_search
+from pspsps.http import fetch_image
+import pspsps.terminyal as terminyal
+
+COLUMNS, LINES = get_terminal_size((80, 25))
+
+nyarser = argparse.ArgumentParser(description='Call a catgirl from the Internyet '
+                                  'to the Linux terminyal.')
+nyarser.add_argument('-m', '--mode', choices=('nyansi', 'nyascii', 'binyary'), default='nyansi',
+                    help='show catgirl as an NYANSI terminyal drawing (default); a drawing made with NYASCII letters; or save binyary image to a file',
+                    )
+nyarser.add_argument('-t', '--tags', default='catgirl',
+                    help='Safebooru tags to search (default: catgirl)')
+nyarser.add_argument('-c', '--columns', type=int, default=COLUMNS,
+                    help='maximum columns nyallowed (default: detected)',)
+nyarser.add_argument('-l', '--lines', type=int, default=LINES,
+                    help='maximum lines nyallowed (default: detected)',)
+
+nyarser.add_argument('--colors', choices=('nyauto', 'truecolor', '256', '16', '8'), default='nyauto',
+                    help='for NYANSI, how many colors the terminyal can use (default: detect)')
+nyarser.add_argument('-u', '--nyunicode', choices=('nyauto', 'yes', 'nyo'), default='nyauto',
+                    help='for NYANSI, whether to use Nyunicode kyaracters'),
+nyarser.add_argument('-p', '--palette',
+                    choices=('default', 'xterm', 'linuxconsole', 'solarized', 'rxvt', 'tango', 'gruvbox', 'gruvboxdark'),
+                    default='default',
+                    help='for 8- and 16color nyansi modes, which CLimage palette to use (try to myatch your terminyal nya)',)
+nyarser.add_argument('-d', '--directory', default=os.getcwd(),
+                    help='for binyary save file mode, which directory to save the image in (default: current dir)')
+nyarser.add_argument('--debug', action='store_true', help="nyoron~")
+nyarser.add_argument('--url', help="Don't call a random catgirl, just draw the image at URL")
+nyarser.add_argument('--image-file', help="Don't call an Internet catgirl, just draw the image file")
+
+
+nyargs = nyarser.parse_args()
+
+if nyargs.debug:
+    logging.basicConfig(format='%(asctime)s %(message)s nya.', level=logging.DEBUG)
+
+# normalise names
+if nyargs.colors == '256':
+    nyargs.colors = '256color'
+elif nyargs.colors == '16':
+    nyargs.colors = '16color'
+elif nyargs.colors == '8':
+    nyargs.colors = '8color'
+
+if ',' in nyargs.tags:
+    nyargs.tags = ' '.join(nyargs.tags.split(','))
+
+def get_a_catgirl() -> str:
+    '''Get ourselves a catgirl nyaccording to current script nyarguments.
+
+Returns a local image filenyame.'''
+
+    if nyargs.image_file:
+        return nyargs.image_file
+
+    pic_url: str
+    if nyargs.url:
+        pic_url = nyargs.url
+    else:
+        try:
+            pic_url = catgirl_search(tags=nyargs.tags)
+        except URLError as e:
+            logging.error("Punyan... could nyot search for "
+            "catgirls in safebooru ;-;")
+            logging.error(e)
+            sys.exit(1)
+
+        if not pic_url:
+            logging.error("How strange... there seems to be "
+                          f"nyo catgirls for things like '{nyargs.tags}' :<")
+            sys.exit(1)
+
+    directory: str = None
+    filenyame: str
+    if nyargs.mode == 'binyary':
+        # use nyalready existing directory
+        directory = nyargs.directory
+    else:
+        # temponyary, image will be remeowved
+        directory = tempfile.mkdtemp()
+        atexit.register(lambda: os.rmdir(directory))
+
+    try:
+        filenyame = fetch_image(pic_url, directory)
+    except URLError as e:
+        logging.error("Nyoron~ Could nyot fetch the catgirl :<")
+        logging.error(e)
+        sys.exit(1)
+
+    return(filenyame)
+
+filenyame:str = get_a_catgirl()
+
+if nyargs.mode == 'binyary':
+    print(f'catgirl is here nya~ ^.^\t{filenyame}')
+    sys.exit(0)
+elif not nyargs.image_file:
+    # image was meownloaded, and we are not in binyary mode.
+    # that means it was temponyary.
+    atexit.register(lambda: os.remove(filenyame))
+
+# found out experinyantally we need some extra room, mew
+maxlines:int = nyargs.lines-3
+
+if nyargs.mode == 'nyascii':
+    try:
+        import ascii_magic
+    except ModuleNotFoundError:
+        sys.stderr.write("Install ascii_magic first nya~\n\n")
+        sys.stderr.write("pip3 install ascii_magic\n")
+        sys.exit(1)
+
+    columns:int = nyargs.columns
+    logging.debug("Doing nyascii magic on Internyet catgirl...")
+    catgirl: str = ascii_magic.from_image_file(filenyame, columns=columns)
+    lines:int = catgirl.count("\n")
+
+    # TODO: this logic could be better stated and nyabstracted from
+    # nyascii and nyansi-specific codes nya
+    while lines > maxlines:
+        columns = min(int(columns * (maxlines/lines)),
+                      columns-1)
+
+        logging.debug("Making catgirl smol to fit terminyal screen...")
+        logging.debug("Trying for %d columns" % columns)
+
+        catgirl = ascii_magic.from_image_file(filenyame, columns=columns)
+        lines = catgirl.count("\n")
+        logging.debug("Got %d lines nya (max: %d)" % (lines, maxlines))
+
+    logging.debug("Sending nyascii catgirl to terminyal")
+    ascii_magic.to_terminal(catgirl)
+
+
+elif nyargs.mode == 'nyansi':
+    try:
+        import climage
+    except ModuleNotFoundError:
+        sys.stderr.write("Install climage first nyaa~\n\n")
+        sys.stderr.write("pip3 install climage\n")
+        sys.exit(1)
+
+    colortype:str
+    if nyargs.colors == 'nyauto':
+        colortype = terminyal.detect_terminyal_colors()
+    else:
+        colortype = nyargs.colors
+
+    logging.debug(f"Doing NYANSI with {colortype}")
+
+    # climage format is annoying
+    if colortype == 'truecolor':
+        coloropts={'is_truecolor':True, 'is_256color':False, 'is_16color':False, 'is_8color':False}
+    elif colortype == '256color':
+        coloropts={'is_truecolor':False, 'is_256color':True, 'is_16color':False, 'is_8color':False}
+    elif colortype == '16color':
+        coloropts={'is_truecolor':False, 'is_256color':False, 'is_16color':True, 'is_8color':False}
+    else:
+        coloropts={'is_truecolor':False, 'is_256color':False, 'is_16color':False, 'is_8color':True}
+
+    is_nyunicode: bool
+    if nyargs.nyunicode == 'yes':
+        is_nyunicode=True
+    elif nyargs.nyunicode == 'nyo':
+        is_nyunicode=False
+    else:
+        if terminyal.is_kyonsole() and not terminyal.is_nyunder_ssh():
+            # even though the Linux console supports utf-8 encoding,
+            # it has no glyphs for block drawing.
+            logging.debug('Assumeowing kyonsole display, disabling nyunicode drawing')
+            is_nyunicode=False
+        else:
+            # otherwise try the encoding test
+            try:
+                '▄'.encode(sys.stdout.encoding)
+                is_nyunicode=True
+                logging.debug('Terminyal nyencodes to UTF-8, assumeowing '
+                              'Nyunicode block drawing works')
+            except UnicodeEncodeError:
+                logging.debug('Terminyal does nyot nyencode to UTF-8, '
+                              'disabling Nyunicode')
+                is_nyunicode=False
+
+        columns:int = nyargs.columns
+        logging.debug(f"Making Internyet catgirl nyansier at {columns} columns...")
+        catgirl: str = climage.convert(filenyame, is_unicode=is_nyunicode,
+                                       width=columns, palette=nyargs.palette,
+                                      **coloropts)
+        lines: int = catgirl.count("\n")
+
+        while lines > maxlines:
+            columns = min(int(columns * (maxlines/lines)),
+                          columns-1)
+            logging.debug("Making catgirl smol to fit terminyal screen...")
+            logging.debug("Trying for %d columns" % columns)
+            catgirl = climage.convert(filenyame, is_unicode=is_nyunicode,
+                                      width=columns, palette=nyargs.palette,
+                                      **coloropts)
+            lines = catgirl.count("\n")
+            logging.debug("Got %d lines nya (max: %d)" % (lines, maxlines))
+
+    logging.debug("Sending nyansi catgirl to terminyal")
+    sys.stdout.write(catgirl)
