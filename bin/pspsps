@@ -25,7 +25,7 @@ nyarser.add_argument('-m', '--mode', choices=('nyansi', 'nyascii', 'binyary'), d
                     )
 nyarser.add_argument('-t', '--tags', default='catgirl',
                     help='Safebooru tags to search (default: catgirl)')
-nyarser.add_argument('-f', '--force-tags',
+nyarser.add_argument('-f', '--force-tags', action='store_true',
                     help="Use provided tags literally (default: try to guess what u mean)")
 
 nyarser.add_argument('-c', '--columns', type=int, default=COLUMNS,
