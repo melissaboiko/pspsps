@@ -17,6 +17,7 @@ rn it does 2 transfornyations:
 
  - comma to space: 'yuri,kiss' → 'yuri kiss'
  - underscore certain words: 'catgirl bunnyboy' → 'cat_girl bunny_boy'
+   (but not 'femboy')
 
     '''
     newtags: str = tags
@@ -25,6 +26,7 @@ rn it does 2 transfornyations:
         newtags = newtags.replace(',', ' ')
 
     newtags = re.sub(r'([a-z])(girl|boy)\b', r'\1_\2', newtags, flags=re.I)
+    newtags = re.sub(r'\bfem_boy\b', r'femboy', newtags, flags=re.I)
     if newtags != tags:
         logging.debug(f'Changed tags from "{tags}" to "{newtags}"')
     return(newtags)
