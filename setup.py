@@ -14,7 +14,7 @@ URL = 'https://github.com/melissaboiko/pspsps'
 EMAIL = 'melissa@namakajiri.net'
 AUTHOR = 'Melissa Boiko'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.2.2'
+VERSION = '0.2.3'
 
 # What packages are required for this module to be executed?
 REQUIRED = [

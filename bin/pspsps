@@ -119,7 +119,10 @@ save_group.add_argument('-d', '--directory', default=os.getcwd(),
                          help='when generating a filename, which directory '
                         'to save the image in (default: current dir)')
 
-nyarser.add_argument('--debug', action='store_true', help="nyoron~")
+nyarser.add_argument('--verbose', action='store_const',
+                     dest='debug', const=logging.INFO, help="talk more")
+nyarser.add_argument('--debug', action='store_const',
+                     const=logging.DEBUG, help="nyoron~")
 
 
 nyargs = nyarser.parse_args()
@@ -132,12 +135,13 @@ if nyargs.fetch or nyargs.destfile:
     nyargs.save = True
 
 if nyargs.debug:
+    level=nyargs.debug
     logformat='%(asctime)s %(levelname)s %(message)s nya'
     try:
         import coloredlogs
-        coloredlogs.install(fmt=logformat, level=logging.DEBUG)
+        coloredlogs.install(fmt=logformat, level=level)
     except ModuleNotFoundError:
-        logging.basicConfig(format=logformat, level=logging.DEBUG)
+        logging.basicConfig(format=logformat, level=level)
 
 # normalise names
 if nyargs.colors == '256':
@@ -263,7 +267,8 @@ nyagain until lines is below maxlines-safety_nyargin.'''
 filenyame:str = get_a_catgirl()
 
 if nyargs.fetch:
-    print(f'catgirl is here nya~ ^.^\t{filenyame}')
+    logging.info('catgirl is here~~ ^.^')
+    print(filenyame)
     sys.exit(0)
 
 # found out experinyantally we need some extra room, mew
