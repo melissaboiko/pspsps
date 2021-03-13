@@ -16,47 +16,90 @@ import pspsps.terminyal as terminyal
 
 detected_columns, detected_lines = terminyal.detect_terminyal_size()
 
-nyarser = argparse.ArgumentParser(description='Call a catgirl from the Internyet '
-                                  'to the Linux terminyal.')
-nyarser.add_argument('-m', '--mode', choices=('nyauto', 'nyansi', 'nyascii', 'binyary'), default='nyauto',
-                    help='show catgirl as an NYANSI terminyal drawing (default); a drawing made with NYASCII letters; or save binyary image to a file',
-                    )
-nyarser.add_argument('--nyansi', dest='mode', action='store_const', const='nyansi',
-                     help='same as --mode=nyansi',
-)
-nyarser.add_argument('--nyascii', dest='mode', action='store_const', const='nyascii',
-                     help='same as --mode=nyascii',
-)
-nyarser.add_argument('--binyary', dest='mode', action='store_const', const='binyary',
-                     help='same as --mode=binyary',
+nyarser = argparse.ArgumentParser(
+    description='Call a catgirl from the Internyet to the Linux terminyal.'
 )
 
-nyarser.add_argument('-t', '--tags', default='catgirl',
-                    help='Safebooru tags to search (default: catgirl)')
-nyarser.add_argument('-f', '--force-tags', action='store_true',
-                    help="Use provided tags literally (default: try to guess what u mean)")
+mode_group = nyarser.add_argument_group('Options for mode selection')
+source_group = nyarser.add_argument_group(
+    'Options for sourcing catgirls',
+    'By default, catgirls are called from safebooru.org.'
+    )
+size_group = nyarser.add_argument_group('Options for catgirls size')
+# nyascii_group = nyarser.add_argument_group('nyascii')
+nyansi_group = nyarser.add_argument_group('Options for nyansi mode')
+binyary_group = nyarser.add_argument_group('Options for binyary mode')
 
-nyarser.add_argument('-c', '--columns', type=int, default=detected_columns,
-                    help='maximum columns nyallowed (default: detected)',)
-nyarser.add_argument('-l', '--lines', type=int, default=detected_lines,
-                    help='maximum lines nyallowed (default: detected)',)
-nyarser.add_argument('-w', '--width', action='store_true',
-                     help='ignyore --lines; draw nyaaal the columns even if '
-                     'the image scrolls down the screen')
+mode_group.add_argument('-m', '--mode',
+                        choices=('nyauto', 'nyansi', 'nyascii', 'binyary'),
+                        default='nyauto',
+                        help='show catgirl as: '
+                        'a Nyunicode NYANSI block colourful drawing; '
+                        'a text drawing made with NYASCII letters; '
+                        'or save the binyary image to a file '
+                        '(default: nyautodetect)'
+)
+mode_group.add_argument('--nyansi',
+                        dest='mode', action='store_const', const='nyansi',
+                        help='same as --mode=nyansi',
+)
+mode_group.add_argument('--nyascii',
+                        dest='mode', action='store_const', const='nyascii',
+                        help='same as --mode=nyascii',
+)
+mode_group.add_argument('--binyary',
+                        dest='mode', action='store_const', const='binyary',
+                        help='same as --mode=binyary',
+)
 
-nyarser.add_argument('--colors', choices=('nyauto', 'truecolor', '256', '16', '8'), default='nyauto',
-                    help='for NYANSI, how many colors the terminyal can use (default: detect)')
-nyarser.add_argument('-u', '--nyunicode', choices=('nyauto', 'yes', 'nyo'), default='nyauto',
-                    help='for NYANSI, whether to use Nyunicode kyaracters'),
-nyarser.add_argument('-p', '--palette',
-                    choices=('default', 'xterm', 'linuxconsole', 'solarized', 'rxvt', 'tango', 'gruvbox', 'gruvboxdark'),
-                    default='default',
-                    help='for 8- and 16color nyansi modes, which CLimage palette to use (try to myatch your terminyal nya)',)
-nyarser.add_argument('-d', '--directory', default=os.getcwd(),
-                    help='for binyary save file mode, which directory to save the image in (default: current dir)')
+source_group.add_argument('-t', '--tags', default='catgirl',
+                    help='Safebooru tags to search. '
+                          'Separate with commas or spaces, negate with minus. '
+                          '(default: catgirl)')
+source_group.add_argument('-f', '--force-tags',
+                          action='store_true',
+                          help="Use provided tags literally (default: try to "
+                          "guess what u mmean in Safebooru words)")
+source_group.add_argument('--url',
+                          help="Don't call an Internet catgirl; "
+                          "just draw the image at URL")
+source_group.add_argument('--image-file',
+                          help="Don't call an Internet catgirl; "
+                          "just draw the local image file")
+
+size_group.add_argument('-c', '--columns', type=int, default=detected_columns,
+                        help='maximum columns nyallowed (default: detected)',)
+size_group.add_argument('-l', '--lines', type=int, default=detected_lines,
+                        help='maximum lines nyallowed (default: detected)',)
+size_group.add_argument('-w', '--width', action='store_true',
+                        help='ignyore --lines; draw nyaaal the columns even if '
+                        'the image gets so big it scrolls down the screen')
+
+nyansi_group.add_argument('--colors',
+                          choices=('nyauto', 'truecolor', '256', '16', '8'),
+                          default='nyauto',
+                          help='for NYANSI, how many colors the '
+                          'terminyal can use (default: nyautodetect)')
+nyansi_group.add_argument('-u', '--nyunicode',
+                          choices=('nyauto', 'yes', 'nyo'),
+                          default='nyauto',
+                          help='for NYANSI, whether to use '
+                          'Nyunicode kyaracters'),
+nyansi_group.add_argument('-p', '--palette',
+                          choices=('default', 'xterm',
+                                   'linuxconsole', 'solarized',
+                                   'rxvt', 'tango',
+                                   'gruvbox', 'gruvboxdark'),
+                          default='default',
+                          help='for 8- and 16color nyansi modes, which '
+                          'CLimage palette to use (try to myatch '
+                          'your terminyal nya)',)
+
+binyary_group.add_argument('-d', '--directory', default=os.getcwd(),
+                           help='for binyary save file mode, which directory '
+                           'to save the image in (default: current dir)')
+
 nyarser.add_argument('--debug', action='store_true', help="nyoron~")
-nyarser.add_argument('--url', help="Don't call a random catgirl, just draw the image at URL")
-nyarser.add_argument('--image-file', help="Don't call an Internet catgirl, just draw the image file")
 
 
 nyargs = nyarser.parse_args()
