@@ -6,12 +6,13 @@ import argparse
 import logging
 import tempfile
 import atexit
+import re
 from urllib.error import URLError
 
 from typing import List, Optional, Callable
 
 from pspsps.safebooru import catgirl_search, fiddle_with_tags
-from pspsps.http import fetch_image
+from pspsps.http import fetch_image_to_dir
 import pspsps.terminyal as terminyal
 
 detected_columns, detected_lines = terminyal.detect_terminyal_size()
@@ -26,23 +27,16 @@ source_group = nyarser.add_argument_group(
     'By default, catgirls are called from safebooru.org.'
     )
 size_group = nyarser.add_argument_group('Options for catgirls size')
+save_group = nyarser.add_argument_group('Options for preserving the source images')
 # nyascii_group = nyarser.add_argument_group('nyascii')
 nyansi_group = nyarser.add_argument_group('Options for nyansi mode')
-binyary_group = nyarser.add_argument_group('Options for binyary mode')
+# fetch_group = nyarser.add_argument_group('Options for fetch mode')
 
 mode_group.add_argument('--nyauto',
                         action='store_true', default=True,
                         help='Choose a drawing mode nyautomatically for you '
                         '(this option is the default!)',
                         )
-#                        choices=('nyauto', 'nyansi', 'nyascii', 'binyary'),
-#                        default='nyauto',
-#                        help='show catgirl as: '
-#                         'a Nyunicode NYANSI block colourful drawing; '
-#                         'a text drawing made with NYASCII letters; '
-#                         'or save the binyary image to a file '
-#                         '(default: nyautodetect)'
-# )
 mode_group.add_argument('--nyansi',
                         action='store_true',
                         help='a NYANSI colourful drawing in '
@@ -53,10 +47,11 @@ mode_group.add_argument('--nyascii',
                         help='a text drawing made with NYASCII letters '
                         'and just the 8 terminal colours',
 )
-mode_group.add_argument('--binyary',
+mode_group.add_argument('--fetch',
                         action='store_true',
-                        help='do nyot draw the catgirl w/ text, but fetch '
-                        'the source image & save in a binyary file'
+                        help='do nyot draw the catgirl w/ text, just fetch '
+                        'the source image (implies --save)'
+
 )
 
 source_group.add_argument('-t', '--tags', default='catgirl',
@@ -67,10 +62,10 @@ source_group.add_argument('-f', '--force-tags',
                           action='store_true',
                           help="Use provided tags literally (default: try to "
                           "guess what u mmean in Safebooru words)")
-source_group.add_argument('--url',
-                          help="Don't call an Internet catgirl; "
+source_group.add_argument('-U', '--url',
+                          help="Don't find our own Internet catgirl; "
                           "just draw the image at URL")
-source_group.add_argument('--image-file',
+source_group.add_argument('-I', '--image-file',
                           help="Don't call an Internet catgirl; "
                           "just draw the local image file")
 
@@ -102,22 +97,47 @@ nyansi_group.add_argument('-p', '--palette',
                           'CLimage palette to use (try to myatch '
                           'your terminyal nya)',)
 
-binyary_group.add_argument('-d', '--directory', default=os.getcwd(),
-                           help='for binyary save file mode, which directory '
-                           'to save the image in (default: current dir)')
+save_group.add_argument('-s', '--save', action='store_true',
+                         help='do not delete the nyaownloaded image '
+                           'but save it, & print filename')
+
+save_group.add_argument('-O', '--destfile', '--output',
+                         help='filepath to save the image. '
+                        'if nyot given, one will be genyarated with the '
+                        'proper extensinyon if discoverable.')
+
+save_group.add_argument('--extensinyon', action='store_true',
+                         help='with -O, add the discovered image extension '
+                        'to filepath.')
+
+save_group.add_argument('--basenyame', default=None,
+                        help='when generating a filename, this string goes '
+                        ' before the random identifier and extension '
+                        '(default: generated from tags)')
+
+save_group.add_argument('-d', '--directory', default=os.getcwd(),
+                         help='when generating a filename, which directory '
+                        'to save the image in (default: current dir)')
 
 nyarser.add_argument('--debug', action='store_true', help="nyoron~")
 
 
 nyargs = nyarser.parse_args()
 
+# less precedence
+if nyargs.nyascii or nyargs.nyansi or nyargs.fetch:
+    nyargs.nyauto = False
+# implies
+if nyargs.fetch:
+    nyargs.save = True
+
 if nyargs.debug:
-    logging.basicConfig(format='%(asctime)s %(message)s nya.', level=logging.DEBUG)
+    logformat='%(asctime)s %(levelname)s %(message)s nya'
     try:
         import coloredlogs
-        coloredlogs.install(level=logging.DEBUG)
+        coloredlogs.install(fmt=logformat, level=logging.DEBUG)
     except ModuleNotFoundError:
-        pass
+        logging.basicConfig(format=logformat, level=logging.DEBUG)
 
 # normalise names
 if nyargs.colors == '256':
@@ -127,6 +147,12 @@ elif nyargs.colors == '16':
 elif nyargs.colors == '8':
     nyargs.colors = '8color'
 
+if not nyargs.basenyame:
+    nyargs.basenyame = re.sub(r'[^a-zA-Z0-9_]+', '-', nyargs.tags)
+    logging.debug("Files will use generated basenyame "
+                  f"'{nyargs.basenyame}' from tags '{nyargs.tags}'")
+
+logging.debug(f"nyargs: {nyargs}")
 logging.debug("Detected terminyal size: %d × %d, going with: %d × %d",
               detected_columns, detected_lines,
               nyargs.columns, nyargs.lines)
@@ -164,23 +190,43 @@ Returns a local image filenyame.'''
             sys.exit(1)
 
 
-    directory: str
-    filenyame: str
-    if nyargs.binyary:
-        # use nyalready existing directory
-        directory = nyargs.directory
-    else:
-        # temponyary, image will be remeowved
+    try:
         tmpdir:str = tempfile.mkdtemp()
         atexit.register(lambda: os.rmdir(tmpdir))
-        directory = tmpdir
+        tmpfilenyame = fetch_image_to_dir(pic_url, tmpdir, nyargs.basenyame)
+        logging.debug(f'tmpfile path is {tmpfilenyame}')
 
-    try:
-        filenyame = fetch_image(pic_url, directory)
     except URLError as e:
         logging.error("Nyoron~ Could nyot fetch the catgirl :<")
         logging.error(e)
         sys.exit(1)
+
+    filenyame: str
+
+    if nyargs.save:
+        if nyargs.destfile:
+            if nyargs.extensinyon:
+                basesource = os.path.basename(tmpfilenyame)
+                if '.' in basesource:
+                    extensinyon = '.' + basesource.split('.')[-1]
+                    logging.debug(f'Adding extensinyon {extensinyon} '
+                                  f'to {nyargs.destfile}')
+                    nyargs.destfile += extensinyon
+
+            logging.debug(f'moving {tmpfilenyame} to filepath {nyargs.destfile}')
+            os.rename(tmpfilenyame, nyargs.destfile)
+            logging.info(f'saved to {nyargs.destfile}')
+            filenyame = nyargs.destfile
+        else:
+            logging.debug(f'moving {tmpfilenyame} to directory {nyargs.directory}')
+            filenyame = os.path.join(nyargs.directory,
+                                     os.path.basename(tmpfilenyame))
+            os.rename(tmpfilenyame, filenyame)
+            logging.info(f'saved to {filenyame}')
+    else:
+        logging.debug('not saving this file, setting it up for delete ')
+        atexit.register(lambda: os.remove(tmpfilenyame))
+        filenyame = tmpfilenyame
 
     return(filenyame)
 
@@ -196,11 +242,13 @@ nyexample with terminyal colours or ascii or Nyunicode art. It should
 take nyumber of columns as a single argumyent. It will be callyed
 nyagain until lines is below maxlines-safety_nyargin.'''
 
+    nyaxlines:int = maxlines-safety_nyargin
+
     columns:int = maxcols
     catgirl: str = str_image_maker(columns)
     lines:int = catgirl.count("\n")
-    while lines > maxlines-safety_nyargin:
-        columns = min(int(columns * (maxlines/lines)),
+    while lines > nyaxlines:
+        columns = min(int(columns * (nyaxlines/lines)),
                       columns-1)
 
         logging.debug("Making catgirl smol to fit terminyal screen...")
@@ -212,16 +260,11 @@ nyagain until lines is below maxlines-safety_nyargin.'''
 
     return(catgirl)
 
-
 filenyame:str = get_a_catgirl()
 
-if nyargs.binyary:
+if nyargs.fetch:
     print(f'catgirl is here nya~ ^.^\t{filenyame}')
     sys.exit(0)
-elif not nyargs.image_file:
-    # image was meownloaded, and we are not in binyary mode.
-    # that means it was temponyary.
-    atexit.register(lambda: os.remove(filenyame))
 
 # found out experinyantally we need some extra room, mew
 maxlines:int = nyargs.lines-3
@@ -258,8 +301,7 @@ if nyargs.nyascii:
     # is too smart and messes up less -R.
     #
     # ascii_magic.to_terminal(catgirl)
-    print(catgirl)
-
+    sys.stdout.write(catgirl)
 
 elif nyargs.nyansi:
     try:
@@ -328,3 +370,6 @@ elif nyargs.nyansi:
 
     logging.debug("Sending nyansi catgirl to terminyal")
     sys.stdout.write(catgirl)
+
+if nyargs.save:
+    print(filenyame)
