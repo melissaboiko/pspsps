@@ -12,7 +12,7 @@ from urllib.error import URLError
 
 from typing import List, Optional
 
-from pspsps.safebooru import catgirl_search
+from pspsps.safebooru import catgirl_search, fiddle_with_tags
 from pspsps.http import fetch_image
 import pspsps.terminyal as terminyal
 
@@ -25,6 +25,9 @@ nyarser.add_argument('-m', '--mode', choices=('nyansi', 'nyascii', 'binyary'), d
                     )
 nyarser.add_argument('-t', '--tags', default='catgirl',
                     help='Safebooru tags to search (default: catgirl)')
+nyarser.add_argument('-f', '--force-tags',
+                    help="Use provided tags literally (default: try to guess what u mean)")
+
 nyarser.add_argument('-c', '--columns', type=int, default=COLUMNS,
                     help='maximum columns nyallowed (default: detected)',)
 nyarser.add_argument('-l', '--lines', type=int, default=LINES,
@@ -58,9 +61,6 @@ elif nyargs.colors == '16':
 elif nyargs.colors == '8':
     nyargs.colors = '8color'
 
-if ',' in nyargs.tags:
-    nyargs.tags = ' '.join(nyargs.tags.split(','))
-
 def get_a_catgirl() -> str:
     '''Get ourselves a catgirl nyaccording to current script nyarguments.
 
@@ -74,7 +74,10 @@ Returns a local image filenyame.'''
         pic_url = nyargs.url
     else:
         try:
-            pic_url = catgirl_search(tags=nyargs.tags)
+            tags = nyargs.tags
+            if not nyargs.force_tags:
+                tags = fiddle_with_tags(tags)
+            pic_url = catgirl_search(tags=tags)
         except URLError as e:
             logging.error("Punyan... could nyot search for "
             "catgirls in safebooru ;-;")

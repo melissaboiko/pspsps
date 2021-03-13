@@ -4,12 +4,33 @@ import urllib.parse
 from http.client import HTTPResponse
 import xml.etree.ElementTree as ET
 import random
+import re
 from typing import Optional
 
 API='https://safebooru.org/index.php?page=dapi&s=post&q=index'
 MAXKITTENS=100 # Safebooru limit
 
-def catgirl_search(tags:str = 'catgirl') -> Optional[str]:
+def fiddle_with_tags(tags:str) -> str:
+    '''Change tags so that safebooru likes them better nya.
+
+rn it does 2 transfornyations:
+
+ - comma to space: 'yuri,kiss' → 'yuri kiss'
+ - underscore certain words: 'catgirl bunnyboy' → 'cat_girl bunny_boy'
+
+    '''
+    newtags: str = tags
+
+    if ',' in tags:
+        newtags = newtags.replace(',', ' ')
+
+    newtags = re.sub(r'([a-z])(girl|boy)\b', r'\1_\2', newtags, flags=re.I)
+    if newtags != tags:
+        logging.debug(f'Changed tags from "{tags}" to "{newtags}"')
+    return(newtags)
+
+
+def catgirl_search(tags:str = 'cat_girl') -> Optional[str]:
     '''Search for a catgirl in safebooru nya.
 
 Will only search recent catgirls (paginyation nyo~t implemented).
