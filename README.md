@@ -70,7 +70,10 @@ but sometimes hetero comes anyway (u.u )
 
 ## authoress
 
-it’s me, mewlissa nya
+it’s me, mewlissa nya    
+melissa@namakajiri.net
+
+![pspsps(1) is drawing a girl herself!](ansyelfie.png)
 
 minnabody let’s keep up the 'LINUX'! with spirit of gentleness and love no kokoro
 
