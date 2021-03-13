@@ -3,16 +3,16 @@ pspsps(1): call a catgirl from the Internyet to the Linux terminyal
 
 > show processes: ps    
 > show catgirls: pspsps    
-—@ln@chaos.social
+    —@ln@chaos.social
 
 pspsps(1) is a compyuter software to call an online catgirl nya.
 
 ![A screenshot of pspsps(1) invoking catgirls nya.](screenshot1.png)
 
-pspsps is nice and tries to guess the best options for you~ ฅ^•ﻌ•^ฅ
+pspsps(1) is nice and tries to guess the best options for you~ ฅ^•ﻌ•^ฅ    
 for most ppl u can just call `pspsps` n it will work! probably (｡•̀ᴗ~)-✧
 
-u can control colours backnyends n stuff.    
+u can control colours, backnyends n stuff.    
 call it with -h, the options should be self-explanyative.
 
 if it looks wrong try with less colours!    
@@ -22,7 +22,7 @@ will look.
 catgirls are kindly provided by Safebooru.    
 u can call other peoples too with `--tags`. like
 
-![pspsps(1) now is calling catboys, nyaaan💕](screenshot2.png)
+![pspsps(1) now is calling catboys, nyaaan💕](screenshot2.png?v=2)
 
 there are optinyons to make them smaller or bigger or save the images
 or load from an image and meowre!    
@@ -30,7 +30,7 @@ or load from an image and meowre!
 ![pspsps(1) is saving a drawing of catgirls in love](screenshot3.png)
 
 u can also make drawings with nyascii characters nyanstead of colourful nyansi
-art.  tho nyascii doesnt look so good in most terminyal sizes, mew.
+art.  tho the mangas in nyascii dont look so good in most terminyal sizes, mew.
 
 ## the 'installation' how to
 
@@ -54,7 +54,8 @@ but sometimes hetero comes anyway (u.u )
 ## things a girl still wants to-do nya
 
  - add paginyation! so search can find catgirls further in the back
- - also support danbooru! it is a bit scary tho (^ ^);
+ - optinyon to show the URL of the nyoriginal post, nyot just the image URL!
+ - and also support danbooru! it is a bit scary tho (^ ^);
  - tests, who is a girl kidding, nyobody does tests ever
 
 ## authoress
