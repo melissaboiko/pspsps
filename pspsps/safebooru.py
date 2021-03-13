@@ -32,6 +32,33 @@ rn it does 2 transfornyations:
     return(newtags)
 
 
+def safebooru_list(tags: str, limit: int=MAXKITTENS, page: int=0) -> HTTPResponse:
+    '''Access safebooru's search API at a certain page number.
+
+Pages appear to start at 0.'''
+
+    reqwest: str = API + '&' + '&'.join([
+        f'limit={limit}',
+        f'tags={urllib.parse.quote_plus(tags)}',
+        f'pid={page}',
+    ])
+
+    logging.debug("Request string: <%s>", reqwest)
+
+    respyonse = urllib.request.urlopen(reqwest)
+    assert(isinstance(respyonse, HTTPResponse)) # to reassyure mypy
+    logging.debug(f"Respyonse status: {respyonse.status}")
+    return(respyonse)
+
+def safebooru_count(posts: ET.ElementTree) -> int:
+    '''Parses a safebooru response XML and returns how man yposts were found.'''
+
+    try:
+        return(int(posts.attrib['count']))
+    except (KeyError, ValueError):
+        logging.warning('Unexpected XML format from safebooru nya')
+        return 0
+
 def catgirl_search(tags:str = 'cat_girl') -> Optional[str]:
     '''Search for a catgirl in safebooru nya.
 
@@ -45,20 +72,25 @@ Kyan raise urllib.error.URLError nya!
     '''
 
     logging.debug("Searching for catgirls (tags: %s)..." % tags)
-    logging.debug("Request string: <%s>" %
-                  (API + '&' + '&'.join([
-                      f'limit={MAXKITTENS}',
-                      f'tags={urllib.parse.quote_plus(tags)}'
-                      ])))
 
-    respyonse = urllib.request.urlopen(API + '&' + '&'.join([
-        f'limit={MAXKITTENS}',
-        f'tags={urllib.parse.quote_plus(tags)}'
-    ]))
-    assert(isinstance(respyonse, HTTPResponse)) # to reassyure mypy
-    logging.debug(f"Respyonse status: {respyonse.status}")
 
     logging.debug("Pyarsing XML (ew, kimoi)...")
+    # first round is just to see how many results we have, so we don’t fetch any
+    respyonse = safebooru_list(tags, limit=0)
+    posts = ET.fromstring(respyonse.read())
+    nposts = safebooru_count(posts)
+
+    logging.debug("Found %d catgirls", nposts)
+    if nposts == 0:
+        return None
+
+    totyal_pages = int(nposts / MAXKITTENS)+1
+    logging.debug("%d pages at %d each", totyal_pages, MAXKITTENS)
+
+    page = random.randrange(totyal_pages)
+    logging.debug("Going with page %d", page)
+
+    respyonse = safebooru_list(tags, page=page)
     posts = ET.fromstring(respyonse.read())
 
     try:
