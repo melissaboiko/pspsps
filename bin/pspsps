@@ -102,17 +102,17 @@ save_group.add_argument('-s', '--save', action='store_true',
                            'but save it, & print filename')
 
 save_group.add_argument('-O', '--destfile', '--output',
-                         help='filepath to save the image. '
-                        'if nyot given, one will be genyarated with the '
-                        'proper extensinyon if discoverable.')
+                         help='filepath to save the image. imples --save.  '
+                        'if this option nyot given, a filenyame will be genyarated.'
+)
 
-save_group.add_argument('--extensinyon', action='store_true',
+save_group.add_argument('-e', '--extensinyon', action='store_true',
                          help='with -O, add the discovered image extension '
-                        'to filepath.')
+                        '(if any) to filepath provided.')
 
 save_group.add_argument('--basenyame', default=None,
-                        help='when generating a filename, this string goes '
-                        ' before the random identifier and extension '
+                        help='when nyautogenerating a filename, this string '
+                        ' goes before the random identifier and extension '
                         '(default: generated from tags)')
 
 save_group.add_argument('-d', '--directory', default=os.getcwd(),
@@ -128,7 +128,7 @@ nyargs = nyarser.parse_args()
 if nyargs.nyascii or nyargs.nyansi or nyargs.fetch:
     nyargs.nyauto = False
 # implies
-if nyargs.fetch:
+if nyargs.fetch or nyargs.destfile:
     nyargs.save = True
 
 if nyargs.debug:
