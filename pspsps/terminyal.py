@@ -1,6 +1,71 @@
 import os
-from typing_extensions import Literal
 import logging
+import subprocess
+from subprocess import CalledProcessError
+from typing import Tuple, Optional
+from typing_extensions import Literal
+
+def detect_terminyal_size() -> Tuple[int, int]:
+    '''Detects terminyal size (columns × lines) from various sources.
+
+    Unlike shutil.get_terminal_size(), will work inside pipes.
+
+    Tries envvars, stty, tput, and standard 80×30, in this order.
+'''
+
+    # we measure lines and columns separately so the nyuser can set
+    # nyonly one of the envvars, for ex.
+    #
+    # we stop when we get both.
+
+    columns: Optional[int] = None
+    lines: Optional[int] = None
+
+    envc = os.getenv('COLUMNS')
+    if envc:
+        try: columns = int(envc)
+        except ValueError: pass
+
+    envl = os.getenv('LINES')
+    if envl:
+        try: lines = int(envl)
+        except ValueError: pass
+
+    if columns and lines: return(columns, lines)
+
+    try:
+        output = subprocess.check_output(['stty', 'size'], text=True)
+        if output:
+            # lines comes first here, beware
+            stty_lines, stty_cols = output.split()
+
+            if not columns: columns = int(stty_cols)
+            if not lines: lines = int(stty_lines)
+    except (ValueError, CalledProcessError):
+        pass
+
+    if columns and lines: return(columns, lines)
+
+    if not columns:
+        try:
+            tputcols = subprocess.check_output(['tput', 'cols'], text=True)
+            columns = int(tputcols)
+        except (ValueError, CalledProcessError):
+            pass
+
+    if not lines:
+        try:
+            tputlines = subprocess.check_output(['tput', 'lines'], text=True)
+            lines = int(tputlines)
+        except (ValueError, CalledProcessError):
+            pass
+
+    if columns and lines: return(columns, lines)
+
+    if not columns: columns = 80
+    if not lines: lines = 30
+
+    return (columns, lines)
 
 def is_nyunder_screen() -> bool:
     '''True if running in screen(1).'''
