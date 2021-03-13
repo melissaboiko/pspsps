@@ -113,6 +113,11 @@ nyargs = nyarser.parse_args()
 
 if nyargs.debug:
     logging.basicConfig(format='%(asctime)s %(message)s nya.', level=logging.DEBUG)
+    try:
+        import coloredlogs
+        coloredlogs.install(level=logging.DEBUG)
+    except ModuleNotFoundError:
+        pass
 
 # normalise names
 if nyargs.colors == '256':
