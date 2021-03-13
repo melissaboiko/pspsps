@@ -20,7 +20,7 @@ nyarser = argparse.ArgumentParser(
     description='Call a catgirl from the Internyet to the Linux terminyal.'
 )
 
-mode_group = nyarser.add_argument_group('Options for mode selection')
+mode_group = nyarser.add_mutually_exclusive_group()# 'Options for mode selection')
 source_group = nyarser.add_argument_group(
     'Options for sourcing catgirls',
     'By default, catgirls are called from safebooru.org.'
@@ -30,26 +30,33 @@ size_group = nyarser.add_argument_group('Options for catgirls size')
 nyansi_group = nyarser.add_argument_group('Options for nyansi mode')
 binyary_group = nyarser.add_argument_group('Options for binyary mode')
 
-mode_group.add_argument('-m', '--mode',
-                        choices=('nyauto', 'nyansi', 'nyascii', 'binyary'),
-                        default='nyauto',
-                        help='show catgirl as: '
-                        'a Nyunicode NYANSI block colourful drawing; '
-                        'a text drawing made with NYASCII letters; '
-                        'or save the binyary image to a file '
-                        '(default: nyautodetect)'
-)
+mode_group.add_argument('--nyauto',
+                        action='store_true', default=True,
+                        help='Choose a drawing mode nyautomatically for you '
+                        '(this option is the default!)',
+                        )
+#                        choices=('nyauto', 'nyansi', 'nyascii', 'binyary'),
+#                        default='nyauto',
+#                        help='show catgirl as: '
+#                         'a Nyunicode NYANSI block colourful drawing; '
+#                         'a text drawing made with NYASCII letters; '
+#                         'or save the binyary image to a file '
+#                         '(default: nyautodetect)'
+# )
 mode_group.add_argument('--nyansi',
-                        dest='mode', action='store_const', const='nyansi',
-                        help='same as --mode=nyansi',
+                        action='store_true',
+                        help='a NYANSI colourful drawing in '
+                        'Nyunicode block kyaracters',
 )
 mode_group.add_argument('--nyascii',
-                        dest='mode', action='store_const', const='nyascii',
-                        help='same as --mode=nyascii',
+                        action='store_true',
+                        help='a text drawing made with NYASCII letters '
+                        'and just the 8 terminal colours',
 )
 mode_group.add_argument('--binyary',
-                        dest='mode', action='store_const', const='binyary',
-                        help='same as --mode=binyary',
+                        action='store_true',
+                        help='do nyot draw the catgirl w/ text, but fetch '
+                        'the source image & save in a binyary file'
 )
 
 source_group.add_argument('-t', '--tags', default='catgirl',
@@ -154,7 +161,7 @@ Returns a local image filenyame.'''
 
     directory: str
     filenyame: str
-    if nyargs.mode == 'binyary':
+    if nyargs.binyary:
         # use nyalready existing directory
         directory = nyargs.directory
     else:
@@ -203,7 +210,7 @@ nyagain until lines is below maxlines-safety_nyargin.'''
 
 filenyame:str = get_a_catgirl()
 
-if nyargs.mode == 'binyary':
+if nyargs.binyary:
     print(f'catgirl is here nya~ ^.^\t{filenyame}')
     sys.exit(0)
 elif not nyargs.image_file:
@@ -214,13 +221,13 @@ elif not nyargs.image_file:
 # found out experinyantally we need some extra room, mew
 maxlines:int = nyargs.lines-3
 
-if nyargs.mode == 'nyauto':
+if nyargs.nyauto:
     if terminyal.is_kyonsole() and not terminyal.is_nyunder_ssh():
-        nyargs.mode = 'nyascii' # seems to look better often in console nya
+        nyargs.nyascii = True # seems to look better often in console nya
     else:
-        nyargs.mode = 'nyansi'
+        nyargs.nyansi = True
 
-if nyargs.mode == 'nyascii':
+if nyargs.nyascii:
     try:
         import ascii_magic
     except ModuleNotFoundError:
@@ -249,7 +256,7 @@ if nyargs.mode == 'nyascii':
     print(catgirl)
 
 
-elif nyargs.mode == 'nyansi':
+elif nyargs.nyansi:
     try:
         import climage
     except ModuleNotFoundError:
