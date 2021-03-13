@@ -29,12 +29,21 @@ or load from an image and meowre!
 
 ![pspsps(1) is saving a drawing of catgirls in love](screenshot3.png)
 
-u can also make drawings with nyascii characters nyanstead of colourful nyansi
-art.  tho the mangas in nyascii dont look so good in most terminyal sizes, mew.
+u can also make drawings with nyascii characters nyanstead of
+colourful nyansi art.  tho the mangas in nyascii dont look so good in
+most terminyal sizes, mew.  but on the linux kyonsole (with few
+colours & no Nyunicode but good resolution) a girl thinks ascii looks
+better nyoften.
+
+![pspsps(1) is drawing catgirl nyascii on the Linux console](screenshot-kyonsole.png)
 
 ## the 'installation' how to
 
     pip3 install pspsps
+
+if u wanna do nyascii art also do this
+
+    pip3 install ascii_magic
 
 ## ✨🍭 search help 🍬💖
 
