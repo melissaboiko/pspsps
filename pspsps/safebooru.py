@@ -45,11 +45,18 @@ Kyan raise urllib.error.URLError nya!
     '''
 
     logging.debug("Searching for catgirls (tags: %s)..." % tags)
-    logging.debug("Request string: %s" %
-                  f'{API}&limit={MAXKITTENS}&tags={urllib.parse.quote_plus(tags)}')
-    respyonse: HTTPResponse = urllib.request.urlopen(
-        f'{API}&limit={MAXKITTENS}&tags={urllib.parse.quote_plus(tags)}'
-    )
+    logging.debug("Request string: <%s>" %
+                  (API + '&' + '&'.join([
+                      f'limit={MAXKITTENS}',
+                      f'tags={urllib.parse.quote_plus(tags)}'
+                      ])))
+
+    respyonse = urllib.request.urlopen(API + '&' + '&'.join([
+        f'limit={MAXKITTENS}',
+        f'tags={urllib.parse.quote_plus(tags)}'
+    ]))
+    assert(isinstance(respyonse, HTTPResponse)) # to reassyure mypy
+    logging.debug(f"Respyonse status: {respyonse.status}")
 
     logging.debug("Pyarsing XML (ew, kimoi)...")
     posts = ET.fromstring(respyonse.read())
