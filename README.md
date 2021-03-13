@@ -3,7 +3,7 @@ pspsps(1): call a catgirl from the Internyet to the Linux terminyal
 
 > show processes: ps    
 > show catgirls: pspsps    
-    —@ln@chaos.social
+    —`@ln@chaos.social`
 
 pspsps(1) is a compyuter software to call an online catgirl nya.
 
@@ -56,6 +56,7 @@ but sometimes hetero comes anyway (u.u )
  - add paginyation! so search can find catgirls further in the back
  - optinyon to show the URL of the nyoriginal post, nyot just the image URL!
  - and also support danbooru! it is a bit scary tho (^ ^);
+   - danbooru API is prob useful to unify tag synonymyms!
  - tests, who is a girl kidding, nyobody does tests ever
 
 ## authoress
