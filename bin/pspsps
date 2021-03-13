@@ -7,9 +7,10 @@ import logging
 import tempfile
 import atexit
 import re
+import errno
 from urllib.error import URLError
 
-from typing import List, Optional, Callable
+from typing import List, Optional, Callable, TextIO
 
 from pspsps.safebooru import catgirl_search, fiddle_with_tags
 from pspsps.http import fetch_image_to_dir
@@ -161,7 +162,18 @@ logging.debug("Detected terminyal size: %d × %d, going with: %d × %d",
               detected_columns, detected_lines,
               nyargs.columns, nyargs.lines)
 
+def chill_writer(text: str, outfile: TextIO = sys.stdout):
+    '''Write text to outfile, and just stop gently on interruptions.'''
 
+    try:
+        outfile.write(text)
+    except KeyboardInterrupt:
+        return
+    except IOError as e:
+        if e.errno == errno.EPIPE:
+            return
+        else:
+            raise e
 def get_a_catgirl() -> str:
     '''Get ourselves a catgirl nyaccording to current script nyarguments.
 
@@ -268,7 +280,7 @@ filenyame:str = get_a_catgirl()
 
 if nyargs.fetch:
     logging.info('catgirl is here~~ ^.^')
-    print(filenyame)
+    chill_writer(filenyame + "\n")
     sys.exit(0)
 
 # found out experinyantally we need some extra room, mew
@@ -306,7 +318,7 @@ if nyargs.nyascii:
     # is too smart and messes up less -R.
     #
     # ascii_magic.to_terminal(catgirl)
-    sys.stdout.write(catgirl)
+    chill_writer(catgirl)
 
 elif nyargs.nyansi:
     try:
@@ -374,7 +386,7 @@ elif nyargs.nyansi:
             catgirl = fit_lines(nyansi_maker, nyargs.columns, nyargs.lines)
 
     logging.debug("Sending nyansi catgirl to terminyal")
-    sys.stdout.write(catgirl)
+    chill_writer(catgirl)
 
 if nyargs.save:
-    print(filenyame)
+    chill_writer(filenyame + "\n")
