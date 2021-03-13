@@ -1,11 +1,15 @@
 pspsps(1): call a catgirl from the Internyet to the Linux terminyal
 ===================================================================
 
+----------------------------
+
 > show processes: ps    
 > show catgirls: pspsps    
-    —`@ln@chaos.social`
+>    —`@ln@chaos.social`
 
-pspsps(1) is a compyuter software to call an online catgirl nya.
+----------------------------
+
+## pspsps(1) is a compyuter software to call an online catgirl nya.
 
 ![A screenshot of pspsps(1) invoking catgirls nya.](screenshot1.png)
 
@@ -13,11 +17,14 @@ pspsps(1) is nice and tries to guess the best options for you~ ฅ^•ﻌ•^ฅ
 for most ppl u can just call `pspsps` n it will work! probably (｡•̀ᴗ~)-✧
 
 u can control colours, backnyends n stuff.    
-call it with -h, the options should be self-explanyative.
+call it with `-h`, the options should be self-explanyative.
 
 if it looks wrong try with less colours!    
-the more columns and lines in your terminyal, the better the drawings
-will look.
+
+the more columns and lines u can use, the better the drawings will
+look. if you want to use the whooole screen width, try `-w`! but it
+can draw the catgirls taller than the terminyal n need scroll.  why
+not use it with `pspsps -w|less -R` (＾ 〜)–☆
 
 catgirls are kindly provided by Safebooru.    
 u can call other peoples too with `--tags`. like
@@ -40,10 +47,6 @@ better nyoften.
 ## the 'installation' how to
 
     pip3 install pspsps
-
-if u wanna do nyascii art also do this
-
-    pip3 install ascii_magic
 
 ## ✨🍭 search help 🍬💖
 
