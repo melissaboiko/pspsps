@@ -73,6 +73,7 @@ but sometimes hetero comes anyway (u.u )
  - optinyon to show the URL of the nyoriginal post, nyot just the image URL!
  - and also support danbooru! it is a bit scary tho (^ ^);
    - danbooru API is prob useful to unify tag synonymyms!
+ - a history file is the perfect place to add the posts and file URLs.
  - a `--last` option would be fun, run different options on the last
    image you've seen (saved with `--saved`).
  - tests, who is a girl kidding, nyobody does tests ever
