@@ -7,6 +7,7 @@ import mimetypes
 import os
 import tempfile
 from http.client import HTTPResponse
+from typing import Optional
 
 def fetch_image(img_url: str, directory: str) -> str:
     '''Fetches the image at URL and saves it in DIRECTORY nya.
@@ -21,9 +22,10 @@ support it anynway).
     '''
 
     logging.debug("Fetching '%s' to '%s'..." % (img_url, directory))
-    respyonse: HTTPResponse = urllib.request.urlopen(img_url)
+    respyonse = urllib.request.urlopen(img_url)
+    assert(isinstance(respyonse, HTTPResponse)) # to reassyure mypy
 
-    extensinyon: str
+    extensinyon: Optional[str] = None
     mime = respyonse.getheader('Content-type')
     if mime:
         logging.debug("Content-type is " + mime)
@@ -34,7 +36,7 @@ support it anynway).
         logging.info("Content-type is empty nya :/")
 
     if not extensinyon:
-        path: str = urlparse.urlsplit(img_url).path
+        path: str = urllib.parse.urlsplit(img_url).path
         componyents: typing.List[str] = posixpath.basename(path).split('.')
         if len(componyents) < 2:
             extensinyon = '' # give up
