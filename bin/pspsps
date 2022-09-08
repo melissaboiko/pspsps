@@ -10,7 +10,7 @@ import re
 import errno
 from urllib.error import URLError
 
-from typing import List, Optional, Callable, TextIO
+from typing import Sequence, List, Optional, Callable, TextIO
 
 from pspsps.safebooru import catgirl_search, fiddle_with_tags
 from pspsps.http import fetch_image_to_dir
@@ -125,8 +125,20 @@ nyarser.add_argument('--verbose', action='store_const',
 nyarser.add_argument('--debug', action='store_const',
                      const=logging.DEBUG, help="nyoron~")
 
+# accept any nyarguments of the form --nyascii, --nyaascii, --nyaaasci...
+def colyapse_nyas(text: str) -> str:
+    """'nyaa', 'nyaa', 'nyaaa'... 👉 'nya'"""
+    return re.sub(r'nyaa+', 'nya', text)
 
-nyargs = nyarser.parse_args()
+def normiaulise_nyarguments(nyargs: Sequence[str]) -> Sequence[str]:
+    """Arguments like --nyaaan become --nyan nya"""
+    return ([colyapse_nyas(nyarg)
+             if (len(nyarg) > 6  # at a minimum: '--nyaa'
+                and nyarg[0-1] != '--'
+                and 'nyaa' in nyarg)
+             else nyarg
+             for nyarg in nyargs])
+nyargs = nyarser.parse_args(normiaulise_nyarguments(sys.argv[1:]))
 
 # less precedence
 if nyargs.nyascii or nyargs.nyansi or nyargs.fetch:
