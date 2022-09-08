@@ -1,3 +1,4 @@
+'''safebooru interface for catgirls nya'''
 import logging
 import urllib.request
 import urllib.parse
@@ -28,11 +29,14 @@ rn it does 2 transfornyations:
     newtags = re.sub(r'([a-z])(girl|boy)\b', r'\1_\2', newtags, flags=re.I)
     newtags = re.sub(r'\bfem_boy\b', r'femboy', newtags, flags=re.I)
     if newtags != tags:
-        logging.debug(f'Changed tags from "{tags}" to "{newtags}"')
-    return(newtags)
+        logging.debug('Changed tags from "%s" to "%s"', tags, newtags)
+    return newtags
 
 
-def safebooru_list(tags: str, limit: int=MAXKITTENS, page: int=0) -> HTTPResponse:
+def safebooru_list(tags: str,
+                   limit: int=MAXKITTENS,
+                   page: int=0,
+                  ) -> HTTPResponse:
     '''Access safebooru's search API at a certain page number.
 
 Pages appear to start at 0.'''
@@ -46,15 +50,15 @@ Pages appear to start at 0.'''
     logging.debug("Request string: <%s>", reqwest)
 
     respyonse = urllib.request.urlopen(reqwest)
-    assert(isinstance(respyonse, HTTPResponse)) # to reassyure mypy
-    logging.debug(f"Respyonse status: {respyonse.status}")
-    return(respyonse)
+    assert isinstance(respyonse, HTTPResponse) # to reassyure mypy
+    logging.debug("Respyonse status: %s", respyonse.status)
+    return respyonse
 
-def safebooru_count(posts: ET.ElementTree) -> int:
+def safebooru_count(posts: ET.Element) -> int:
     '''Parses a safebooru response XML and returns how man yposts were found.'''
 
     try:
-        return(int(posts.attrib['count']))
+        return int(posts.attrib['count'])
     except (KeyError, ValueError):
         logging.warning('Unexpected XML format from safebooru nya')
         return 0
@@ -71,7 +75,7 @@ Kyan raise urllib.error.URLError nya!
 
     '''
 
-    logging.debug("Searching for catgirls (tags: %s)..." % tags)
+    logging.debug("Searching for catgirls (tags: %s)...", tags)
 
 
     logging.debug("Pyarsing XML (ew, kimoi)...")
@@ -99,5 +103,5 @@ Kyan raise urllib.error.URLError nya!
         return None
 
     pic_url = kitten.attrib['file_url']
-    logging.debug("Picked a catgirl: " + pic_url)
+    logging.debug("Picked a catgirl: %s", pic_url)
     return pic_url

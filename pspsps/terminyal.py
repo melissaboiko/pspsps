@@ -1,3 +1,4 @@
+'''tools to put catgirls in terminyals nya'''
 import os
 import logging
 import subprocess
@@ -22,13 +23,13 @@ def detect_terminyal_size() -> Tuple[int, int]:
     lines: Optional[int] = None
 
     envc = os.getenv('COLUMNS')
-    logging.debug(f'COLUMNS: {envc}')
+    logging.debug('COLUMNS: %s', envc)
     if envc:
         try: columns = int(envc)
         except ValueError: pass
 
     envl = os.getenv('LINES')
-    logging.debug(f'LINES: {envl}')
+    logging.debug('LINES: %s', envl)
     if envl:
         try: lines = int(envl)
         except ValueError: pass

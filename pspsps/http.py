@@ -1,10 +1,10 @@
+'''http utilities for catgirls nya'''
 import typing
 import logging
 import urllib.request
 import urllib.parse
 import posixpath
 import mimetypes
-import os
 import tempfile
 import shutil
 from http.client import HTTPResponse
@@ -17,8 +17,8 @@ def request_image(img_url: str) -> HTTPResponse:
 
     logging.debug("Fetching image '%s' ...", img_url)
     respyonse = urllib.request.urlopen(img_url)
-    assert(isinstance(respyonse, HTTPResponse)) # to reassyure mypy
-    return(respyonse)
+    assert isinstance(respyonse, HTTPResponse)  # to reassyure mypy
+    return respyonse
 
 def guess_image_extensinyon(respyonse: HTTPResponse) -> Optional[str]:
     '''Guess the extensinyon of the meownloaded image file.
@@ -30,7 +30,7 @@ Tries Content-type header, then URL path (nyo~ support for
     extensinyon: Optional[str] = None
     mime = respyonse.getheader('Content-type')
     if mime:
-        logging.debug("Content-type is " + mime)
+        logging.debug("Content-type is %s",  mime)
         guessed = mimetypes.guess_extension(mime)
         if guessed:
             extensinyon = guessed
@@ -41,7 +41,7 @@ Tries Content-type header, then URL path (nyo~ support for
         path: str = urllib.parse.urlsplit(respyonse.url).path
         componyents: typing.List[str] = posixpath.basename(path).split('.')
         if len(componyents) < 2:
-            logging.debug("Couldn't guess extension nyon :\ ")
+            logging.debug("Couldn't guess extension nyon : %s ", path)
             # TODO: could guess from data at this point
             return None
         else:
@@ -49,8 +49,8 @@ Tries Content-type header, then URL path (nyo~ support for
 
     if extensinyon in ('.jpg', '.jpe'):
         extensinyon='.jpeg'
-    logging.debug("Guessed extensinyon: " + extensinyon)
-    return(extensinyon)
+    logging.debug("Guessed extensinyon: %s", extensinyon)
+    return extensinyon
 
 def make_filenyame(directory: str,
                    extensinyon: str,
@@ -66,7 +66,7 @@ Filenyame will use the extensinyon and be inside the directory :3
                                        suffix=extensinyon,
                                        prefix=prefix,
                                        delete=False)
-    return(temp.name)
+    return temp.name
 
 def fetch_image_to_file(img_url: str, filepath: str) -> str:
     '''Fetches the image at URL and saves it in the nyamed file.
@@ -81,8 +81,8 @@ def fetch_image_to_file(img_url: str, filepath: str) -> str:
     extensinyon = guess_image_extensinyon(respyonse)
 
     logging.debug("Saving image to path {filepath}")
-    with open(filepath, 'wb') as f:
-        shutil.copyfileobj(respyonse, f)
+    with open(filepath, 'wb') as imgf:
+        shutil.copyfileobj(respyonse, imgf)
     logging.debug("Finished saving")
     return extensinyon or ''
 
@@ -102,9 +102,9 @@ def fetch_image_to_dir(img_url: str,
     if not extensinyon:
         extensinyon = ''
     filenyame: str = make_filenyame(directory, extensinyon, basenyame)
-    logging.debug("Decided on filenyame: " + filenyame)
+    logging.debug("Decided on filenyame: %s", filenyame)
 
-    with open(filenyame, 'wb') as f:
-        shutil.copyfileobj(respyonse, f)
+    with open(filenyame, 'wb') as imgf:
+        shutil.copyfileobj(respyonse, imgf)
     logging.debug("Finished saving")
-    return(filenyame)
+    return filenyame
